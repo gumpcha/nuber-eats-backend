@@ -19,9 +19,9 @@ export class UsersResolver {
   async createAccount(
     @Args('input') createAccountInput: CreateAccountInput,
   ): Promise<CreateAccountOutput> {
-    const error = await this.users.createAccount(createAccountInput);
+    const [ok, error] = await this.users.createAccount(createAccountInput);
     return {
-      ok: error ? false : true,
+      ok,
       error,
     };
   }
