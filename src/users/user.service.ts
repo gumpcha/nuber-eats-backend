@@ -6,11 +6,14 @@ import { LoginInput } from './dtos/login.dto';
 import { User } from './entities/user.entity';
 import { JwtService } from 'src/jwt/jwt.service';
 import { EditProfileInput } from './dtos/edit-profile.dto';
+import { Verification } from './entities/verification.entity';
 
 @Injectable()
 export class UsersService {
   constructor(
     @InjectRepository(User) private readonly users: Repository<User>,
+    @InjectRepository(Verification)
+    private readonly verification: Repository<Verification>,
     private readonly jwtService: JwtService,
   ) {}
 
@@ -25,7 +28,10 @@ export class UsersService {
         return [false, 'exist email'];
       }
 
-      this.users.save(this.users.create({ email, password, role }));
+      const user = await this.users.save(
+        this.users.create({ email, password, role }),
+      );
+      await this.verification.save(this.verification.create({ user }));
       return [true];
     } catch (error) {
       return [false, 'creating failed'];
@@ -37,7 +43,10 @@ export class UsersService {
     password,
   }: LoginInput): Promise<{ ok: boolean; error?: string; token?: string }> {
     try {
-      const user = await this.users.findOne({ email });
+      const user = await this.users.findOne(
+        { email },
+        { select: ['id', 'password'] },
+      );
       if (!user) {
         return {
           ok: false,
@@ -72,8 +81,25 @@ export class UsersService {
 
   async editProfile(userId: number, { email, password }: EditProfileInput) {
     const user = await this.users.findOne({ id: userId });
-    if (email) user.email = email;
+    if (email) {
+      user.email = email;
+      user.verified = false;
+      await this.verification.save(this.verification.create({ user }));
+    }
     if (password) user.password = password;
     return this.users.save(user);
+  }
+
+  async verifyEmail(code: string): Promise<boolean> {
+    const verification = await this.verification.findOne(
+      { code },
+      { relations: ['user'] },
+    );
+    if (!verification) return false;
+
+    const user = verification.user;
+    user.verified = true;
+    await this.users.save(user);
+    return true;
   }
 }

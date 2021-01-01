@@ -8,7 +8,7 @@ import {
   registerEnumType,
 } from '@nestjs/graphql';
 import { CoreEntity } from 'src/common/entities/core.entity';
-import { IsEmail, isEnum, IsEnum, IsString } from 'class-validator';
+import { IsEmail, IsEnum, IsString } from 'class-validator';
 
 enum UserRole {
   Client,
@@ -28,7 +28,7 @@ export class User extends CoreEntity {
   email: string;
 
   @Field(() => String)
-  @Column()
+  @Column({ select: false })
   @IsString()
   password: string;
 
@@ -37,14 +37,20 @@ export class User extends CoreEntity {
   @IsEnum(UserRole)
   role: UserRole;
 
+  @Field(() => Boolean)
+  @Column({ default: false })
+  verified: boolean;
+
   @BeforeInsert()
   @BeforeUpdate()
   async hassPassword(): Promise<void> {
-    try {
-      this.password = await bcrypt.hash(this.password, 10);
-    } catch (error) {
-      console.log(error);
-      throw new InternalServerErrorException();
+    if (this.password) {
+      try {
+        this.password = await bcrypt.hash(this.password, 10);
+      } catch (error) {
+        console.log(error);
+        throw new InternalServerErrorException();
+      }
     }
     return;
   }
