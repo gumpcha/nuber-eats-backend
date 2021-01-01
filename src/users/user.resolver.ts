@@ -18,26 +18,15 @@ export class UsersResolver {
   constructor(private readonly users: UsersService) {}
 
   @Mutation(() => CreateAccountOutput)
-  async createAccount(
+  createAccount(
     @Args('input') createAccountInput: CreateAccountInput,
   ): Promise<CreateAccountOutput> {
-    const [ok, error] = await this.users.createAccount(createAccountInput);
-    return {
-      ok,
-      error,
-    };
+    return this.users.createAccount(createAccountInput);
   }
 
   @Mutation(() => LoginOutput)
-  async login(@Args('input') loginInput: LoginInput): Promise<LoginOutput> {
-    try {
-      return this.users.login(loginInput);
-    } catch (error) {
-      return {
-        ok: false,
-        error,
-      };
-    }
+  login(@Args('input') loginInput: LoginInput): Promise<LoginOutput> {
+    return this.users.login(loginInput);
   }
 
   @Query(() => User)
@@ -47,46 +36,21 @@ export class UsersResolver {
   }
 
   @Query(() => UserProfileOutput)
-  async userProfile(@Args() { userId }: UserProfileInput) {
-    try {
-      const user = await this.users.findById(userId);
-      if (!user) throw Error();
-      return {
-        ok: true,
-        user,
-      };
-    } catch (error) {
-      return {
-        ok: false,
-        error: 'User not found',
-      };
-    }
+  userProfile(@Args() { userId }: UserProfileInput) {
+    return this.users.findById(userId);
   }
 
   @Mutation(() => EditProfileOutput)
   @UseGuards(AuthGuard)
-  async editProfile(
+  editProfile(
     @AuthUser() authUser: User,
     @Args('input') editProfileInput: EditProfileInput,
   ): Promise<EditProfileOutput> {
-    try {
-      await this.users.editProfile(authUser.id, editProfileInput);
-      return {
-        ok: true,
-      };
-    } catch (error) {
-      return {
-        ok: false,
-        error,
-      };
-    }
+    return this.users.editProfile(authUser.id, editProfileInput);
   }
 
   @Mutation(() => VerifyEmailOutput)
-  async verifyEmail(@Args('input') { code }: VerifyEmailInput) {
-    const result = await this.users.verifyEmail(code);
-    return {
-      ok: result,
-    };
+  verifyEmail(@Args('input') { code }: VerifyEmailInput) {
+    return this.users.verifyEmail(code);
   }
 }
