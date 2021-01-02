@@ -15,6 +15,7 @@ import { JwtModule } from './jwt/jwt.module';
 import { JwtMiddleware } from './jwt/jwt.middleware';
 import { AuthModule } from './auth/auth.module';
 import { Verification } from './users/entities/verification.entity';
+import { MailModule } from './mail/mail.module';
 
 @Module({
   imports: [
@@ -31,6 +32,9 @@ import { Verification } from './users/entities/verification.entity';
         DB_PASSWORD: Joi.string().required(),
         DB_NAME: Joi.string().required(),
         JWT_SECRET: Joi.string().required(),
+        MAILGUN_API_KEY: Joi.string().required(),
+        MAILGUN_DOMAIN_NAME: Joi.string().required(),
+        MAILGUN_FROM_EMAIL: Joi.string().required(),
       }),
     }),
     TypeOrmModule.forRoot({
@@ -50,6 +54,11 @@ import { Verification } from './users/entities/verification.entity';
     }),
     JwtModule.forRoot({
       secret_key: process.env.JWT_SECRET,
+    }),
+    MailModule.forRoot({
+      api_key: process.env.MAILGUN_API_KEY,
+      domain_name: process.env.MAILGUN_DOMAIN_NAME,
+      from_email: process.env.MAILGUN_FROM_EMAIL,
     }),
     UsersModule,
     CommonModule,
