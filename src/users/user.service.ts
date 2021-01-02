@@ -1,7 +1,10 @@
 import { Repository } from 'typeorm';
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { CreateAccountInput, CreateAccountOutput } from './dtos/create-account.dto';
+import {
+  CreateAccountInput,
+  CreateAccountOutput,
+} from './dtos/create-account.dto';
 import { LoginInput } from './dtos/login.dto';
 import { User } from './entities/user.entity';
 import { JwtService } from 'src/jwt/jwt.service';
@@ -124,7 +127,7 @@ export class UsersService {
 
       verification.user.verified = true;
       await this.users.save(verification.user);
-
+      await this.verification.delete(verification.id);
       return {
         ok: true,
       };
