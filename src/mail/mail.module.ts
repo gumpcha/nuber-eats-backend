@@ -9,11 +9,11 @@ export class MailModule {
     return {
       module: MailModule,
       providers: [
+        MailService,
         {
           provide: CONFIG_OPTIONS,
           useValue: options,
         },
-        MailService,
       ],
       exports: [MailService],
     };

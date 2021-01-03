@@ -8,9 +8,7 @@ import { CONFIG_OPTIONS } from 'src/common/common.constants';
 export class MailService {
   constructor(
     @Inject(CONFIG_OPTIONS) private readonly options: MailConfigOptions,
-  ) {
-    this.sendEmail('testing', 'test');
-  }
+  ) {}
 
   private async sendEmail(subject: string, content: string) {
     const form = new FormData();
